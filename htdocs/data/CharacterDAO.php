@@ -1,42 +1,17 @@
 <?php
-require_once(__DIR__ . "/model/PlayerCharacter.php");
-require_once(__DIR__ . "/model/Characteristic.php");
+include_once(__DIR__ . "/model/Character.php");
+include_once(__DIR__ . "/model/Characteristic.php");
 
 Class CharacterDAO {
-    public static function getCharactersByPlayerName($playerName){
+    
+    public static function getCharacterById($idCharacter){
         require_once(__DIR__ . "/connection.php");
         $database = createPDO();
 
-
-        $SQL = "SELECT name FROM player_character WHERE player_name LIKE(:player_name)";
-        
-        $request = $database->prepare($SQL);
-        $request->bindValue(":player_name", $playerName, PDO::PARAM_STR);
-        $success = $request->execute();
-
-        if (!$success) {
-            return null;
-        }
-
-        $result = $request->fetchAll(PDO::FETCH_ASSOC);
-
-        $characterFiltered = array();
-        foreach ($result as $character) {
-            $characterFiltered[] = new PlayerCharacter($character);
-        }
-
-        return $characterFiltered;
-    }
-
-    public static function getCharacterFromPlayer($playerName, $characterName){
-        require_once(__DIR__ . "/connection.php");
-        $database = createPDO();
-
-        $SQL = "SELECT * FROM player_character WHERE player_name LIKE(:player_name) AND name LIKE(:name)";
+        $SQL = "SELECT * FROM player_character WHERE id = :id";
 
         $request = $database->prepare($SQL);
-        $request->bindValue(":player_name", $playerName, PDO::PARAM_STR);
-        $request->bindValue(":name", $characterName, PDO::PARAM_STR);
+        $request->bindValue(':id', $idCharacter, PDO::PARAM_INT);
         $success = $request->execute();
 
         if (!$success) {
@@ -44,8 +19,50 @@ Class CharacterDAO {
         }
 
         $result = $request->fetch(PDO::FETCH_ASSOC);
-        $character = new PlayerCharacter($result);
+        $character = new Character($result);
 
         return $character;
+    }
+
+    public static function createCharacter($playerId, $characterName, $skillPreset){
+        require_once(__DIR__ . "/connection.php");
+        $database = createPDO();
+
+        $SQL = "INSERT INTO player_character (id_player, name, skill_preset) VALUES (:id_player, :name, :skill_preset)";
+
+        $request = $database->prepare($SQL);
+        $request->bindValue(':id_player', $playerId, PDO::PARAM_INT);
+        $request->bindValue(':name', $characterName, PDO::PARAM_STR);
+        $request->bindValue(':skill_preset', $skillPreset, PDO::PARAM_INT);
+        $success = $request->execute();
+
+        if ($success) {
+            return $database->lastInsertId();
+        }
+
+        return null;
+    }
+
+    public static function listCharactersByPlayer($playerId){
+        require_once(__DIR__ . "/connection.php");
+        $database = createPDO();
+
+        $SQL = "SELECT id, name FROM player_character WHERE id_player = :id_player";
+
+        $request = $database->prepare($SQL);
+        $request->bindValue(':id_player', $playerId, PDO::PARAM_INT);
+        $success = $request->execute();
+
+        if (!$success) {
+            return null;
+        }
+
+        $results = $request->fetchAll(PDO::FETCH_ASSOC);
+        $characters = array();
+        foreach ($results as $result) {
+            $characters[] = new PlayerCharacter($result);
+        }
+
+        return $characters;
     }
 }

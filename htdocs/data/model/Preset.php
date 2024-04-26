@@ -1,5 +1,5 @@
 <?php
-class Preset implements JsonSerializable{
+class Preset {
     public ?int $id;
     public ?string $name;
 

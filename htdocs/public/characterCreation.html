@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Character Creation</title>
+</head>
+<body>
+    <form id="characterForm">
+        <label for="player_id">Player ID:</label><br>
+        <input type="text" id="player_id" name="player_id"><br>
+        <label for="character_name">Character Name:</label><br>
+        <input type="text" id="character_name" name="character_name"><br>
+        <label for="skill_preset">Skill Preset:</label><br>
+        <select id="skill_preset" name="skill_preset"></select><br>
+        <input type="submit" value="Create Character">
+    </form>
+
+    <script>
+        // Fetch the list of presets from the API and populate the dropdown
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://127.0.0.1/public/endpoints/list-presets.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var presets = JSON.parse(xhr.responseText);
+                var select = document.getElementById('skill_preset');
+                presets.forEach(function(preset) {
+                    var option = document.createElement('option');
+                    option.value = preset.id;
+                    option.textContent = preset.name;
+                    select.appendChild(option);
+                });
+            }
+        };
+        xhr.send();
+
+        // Handle form submission
+        document.getElementById('characterForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var playerId = document.getElementById('player_id').value;
+            var characterName = document.getElementById('character_name').value;
+            var skillPreset = document.getElementById('skill_preset').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://127.0.0.1/public/endpoints/create-character.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    alert('Character created successfully');
+                } else {
+                    alert('An error occurred');
+                }
+            };
+            xhr.send('player_id=' + playerId + '&character_name=' + characterName + '&skill_preset=' + skillPreset);
+        });
+    </script>
+</body>
+</html>

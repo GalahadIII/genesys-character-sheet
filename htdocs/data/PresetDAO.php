@@ -4,11 +4,11 @@ include_once(__DIR__ . "/model/Skill.php");
 
 Class PresetDAO {
 
-    public static function listPreset(){
+    public static function listPresets(){
         require_once(__DIR__ . "/connection.php");
         $database = createPDO();
-        
-        $SQL = "SELECT * FROM preset WHERE 1";
+
+        $SQL = "SELECT * FROM preset";
 
         $request = $database->prepare($SQL);
         $success = $request->execute();
@@ -17,14 +17,13 @@ Class PresetDAO {
             return null;
         }
 
-        $result = $request->fetchAll(PDO::FETCH_ASSOC);
-
-        $presetFiltered = array();
-        foreach ($result as $preset) {
-            $presetFiltered[] = new Preset($preset);
+        $results = $request->fetchAll(PDO::FETCH_ASSOC);
+        $presets = array();
+        foreach ($results as $result) {
+            $presets[] = new Preset($result);
         }
 
-        return $presetFiltered;
+        return $presets;
     }
 
     public static function createPreset($presetName){
